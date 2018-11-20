@@ -55,6 +55,10 @@ func NewWithStringComparator(values ...interface{}) *Set {
 	return set
 }
 
+func CopyFrom(ts *Set) *Set {
+	return &Set{tree: rbt.CopyFrom(ts.tree)}
+}
+
 // Add adds the items (one or more) to the set.
 func (set *Set) Add(items ...interface{}) {
 	for _, item := range items {
