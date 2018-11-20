@@ -59,6 +59,10 @@ func CopyFrom(ts *Set) *Set {
 	return &Set{tree: rbt.CopyFrom(ts.tree)}
 }
 
+func (set *Set) GetComparator() utils.Comparator {
+	return set.tree.Comparator
+}
+
 // Add adds the items (one or more) to the set.
 func (set *Set) Add(items ...interface{}) {
 	for _, item := range items {

@@ -47,6 +47,10 @@ func CopyFrom(tm *Map) *Map {
 	return &Map{tree: rbt.CopyFrom(tm.tree)}
 }
 
+func (m *Map) GetComparator() utils.Comparator {
+	return m.tree.Comparator
+}
+
 // Put inserts key-value pair into the map.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
 func (m *Map) Put(key interface{}, value interface{}) {
