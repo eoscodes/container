@@ -118,9 +118,9 @@ func TestMultiMapRemove(t *testing.T) {
 	}
 }
 
-/*
-func TestMapFloor(t *testing.T) {
-	m := NewWithIntComparator()
+
+func TestMultiMapFloor(t *testing.T) {
+	m := NewMultiWithIntComparator()
 	m.Put(7, "g")
 	m.Put(3, "c")
 	m.Put(1, "a")
@@ -147,8 +147,8 @@ func TestMapFloor(t *testing.T) {
 	}
 }
 
-func TestMapCeiling(t *testing.T) {
-	m := NewWithIntComparator()
+func TestMultiMapCeiling(t *testing.T) {
+	m := NewMultiWithIntComparator()
 	m.Put(7, "g")
 	m.Put(3, "c")
 	m.Put(1, "a")
@@ -175,27 +175,9 @@ func TestMapCeiling(t *testing.T) {
 	}
 }
 
-func sameElements(a []interface{}, b []interface{}) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for _, av := range a {
-		found := false
-		for _, bv := range b {
-			if av == bv {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-	return true
-}
 
-func TestMapEach(t *testing.T) {
-	m := NewWithStringComparator()
+func TestMultiMapEach(t *testing.T) {
+	m := NewMultiWithStringComparator()
 	m.Put("c", 3)
 	m.Put("a", 1)
 	m.Put("b", 2)
@@ -224,7 +206,7 @@ func TestMapEach(t *testing.T) {
 	})
 }
 
-func TestMapMap(t *testing.T) {
+func TestMultiMapMap(t *testing.T) {
 	m := NewWithStringComparator()
 	m.Put("c", 3)
 	m.Put("a", 1)
@@ -246,65 +228,65 @@ func TestMapMap(t *testing.T) {
 	}
 }
 
-func TestMapSelect(t *testing.T) {
-	m := NewWithStringComparator()
-	m.Put("c", 3)
-	m.Put("a", 1)
-	m.Put("b", 2)
-	selectedMap := m.Select(func(key interface{}, value interface{}) bool {
-		return key.(string) >= "a" && key.(string) <= "b"
-	})
-	if actualValue, _ := selectedMap.Get("a"); actualValue != 1 {
-		t.Errorf("Got %v expected %v", actualValue, "value: a")
-	}
-	if actualValue, _ := selectedMap.Get("b"); actualValue != 2 {
-		t.Errorf("Got %v expected %v", actualValue, "value: b")
-	}
-	if selectedMap.Size() != 2 {
-		t.Errorf("Got %v expected %v", selectedMap.Size(), 2)
-	}
-}
+//func TestMapSelect(t *testing.T) {
+//	m := NewWithStringComparator()
+//	m.Put("c", 3)
+//	m.Put("a", 1)
+//	m.Put("b", 2)
+//	selectedMap := m.Select(func(key interface{}, value interface{}) bool {
+//		return key.(string) >= "a" && key.(string) <= "b"
+//	})
+//	if actualValue, _ := selectedMap.Get("a"); actualValue != 1 {
+//		t.Errorf("Got %v expected %v", actualValue, "value: a")
+//	}
+//	if actualValue, _ := selectedMap.Get("b"); actualValue != 2 {
+//		t.Errorf("Got %v expected %v", actualValue, "value: b")
+//	}
+//	if selectedMap.Size() != 2 {
+//		t.Errorf("Got %v expected %v", selectedMap.Size(), 2)
+//	}
+//}
+//
+//func TestMapAny(t *testing.T) {
+//	m := NewWithStringComparator()
+//	m.Put("c", 3)
+//	m.Put("a", 1)
+//	m.Put("b", 2)
+//	any := m.Any(func(key interface{}, value interface{}) bool {
+//		return value.(int) == 3
+//	})
+//	if any != true {
+//		t.Errorf("Got %v expected %v", any, true)
+//	}
+//	any = m.Any(func(key interface{}, value interface{}) bool {
+//		return value.(int) == 4
+//	})
+//	if any != false {
+//		t.Errorf("Got %v expected %v", any, false)
+//	}
+//}
+//
+//func TestMapAll(t *testing.T) {
+//	m := NewWithStringComparator()
+//	m.Put("c", 3)
+//	m.Put("a", 1)
+//	m.Put("b", 2)
+//	all := m.All(func(key interface{}, value interface{}) bool {
+//		return key.(string) >= "a" && key.(string) <= "c"
+//	})
+//	if all != true {
+//		t.Errorf("Got %v expected %v", all, true)
+//	}
+//	all = m.All(func(key interface{}, value interface{}) bool {
+//		return key.(string) >= "a" && key.(string) <= "b"
+//	})
+//	if all != false {
+//		t.Errorf("Got %v expected %v", all, false)
+//	}
+//}
 
-func TestMapAny(t *testing.T) {
-	m := NewWithStringComparator()
-	m.Put("c", 3)
-	m.Put("a", 1)
-	m.Put("b", 2)
-	any := m.Any(func(key interface{}, value interface{}) bool {
-		return value.(int) == 3
-	})
-	if any != true {
-		t.Errorf("Got %v expected %v", any, true)
-	}
-	any = m.Any(func(key interface{}, value interface{}) bool {
-		return value.(int) == 4
-	})
-	if any != false {
-		t.Errorf("Got %v expected %v", any, false)
-	}
-}
-
-func TestMapAll(t *testing.T) {
-	m := NewWithStringComparator()
-	m.Put("c", 3)
-	m.Put("a", 1)
-	m.Put("b", 2)
-	all := m.All(func(key interface{}, value interface{}) bool {
-		return key.(string) >= "a" && key.(string) <= "c"
-	})
-	if all != true {
-		t.Errorf("Got %v expected %v", all, true)
-	}
-	all = m.All(func(key interface{}, value interface{}) bool {
-		return key.(string) >= "a" && key.(string) <= "b"
-	})
-	if all != false {
-		t.Errorf("Got %v expected %v", all, false)
-	}
-}
-
-func TestMapFind(t *testing.T) {
-	m := NewWithStringComparator()
+func TestMultiMapFind(t *testing.T) {
+	m := NewMultiWithStringComparator()
 	m.Put("c", 3)
 	m.Put("a", 1)
 	m.Put("b", 2)
@@ -322,32 +304,32 @@ func TestMapFind(t *testing.T) {
 	}
 }
 
-func TestMapChaining(t *testing.T) {
-	m := NewWithStringComparator()
-	m.Put("c", 3)
-	m.Put("a", 1)
-	m.Put("b", 2)
-	chainedMap := m.Select(func(key interface{}, value interface{}) bool {
-		return value.(int) > 1
-	}).Map(func(key interface{}, value interface{}) (interface{}, interface{}) {
-		return key.(string) + key.(string), value.(int) * value.(int)
-	})
-	if actualValue := chainedMap.Size(); actualValue != 2 {
-		t.Errorf("Got %v expected %v", actualValue, 2)
-	}
-	if actualValue, found := chainedMap.Get("aa"); actualValue != nil || found {
-		t.Errorf("Got %v expected %v", actualValue, nil)
-	}
-	if actualValue, found := chainedMap.Get("bb"); actualValue != 4 || !found {
-		t.Errorf("Got %v expected %v", actualValue, 4)
-	}
-	if actualValue, found := chainedMap.Get("cc"); actualValue != 9 || !found {
-		t.Errorf("Got %v expected %v", actualValue, 9)
-	}
-}
+//func TestMultiMapChaining(t *testing.T) {
+//	m := NewMultiWithStringComparator()
+//	m.Put("c", 3)
+//	m.Put("a", 1)
+//	m.Put("b", 2)
+//	chainedMap := m.Select(func(key interface{}, value interface{}) bool {
+//		return value.(int) > 1
+//	}).Map(func(key interface{}, value interface{}) (interface{}, interface{}) {
+//		return key.(string) + key.(string), value.(int) * value.(int)
+//	})
+//	if actualValue := chainedMap.Size(); actualValue != 2 {
+//		t.Errorf("Got %v expected %v", actualValue, 2)
+//	}
+//	if actualValue, found := chainedMap.Get("aa"); actualValue != nil || found {
+//		t.Errorf("Got %v expected %v", actualValue, nil)
+//	}
+//	if actualValue, found := chainedMap.Get("bb"); actualValue != 4 || !found {
+//		t.Errorf("Got %v expected %v", actualValue, 4)
+//	}
+//	if actualValue, found := chainedMap.Get("cc"); actualValue != 9 || !found {
+//		t.Errorf("Got %v expected %v", actualValue, 9)
+//	}
+//}
 
-func TestMapIteratorNextOnEmpty(t *testing.T) {
-	m := NewWithStringComparator()
+func TestMultiMapIteratorNextOnEmpty(t *testing.T) {
+	m := NewMultiWithStringComparator()
 	it := m.Iterator()
 	it = m.Iterator()
 	for it.Next() {
@@ -355,8 +337,8 @@ func TestMapIteratorNextOnEmpty(t *testing.T) {
 	}
 }
 
-func TestMapIteratorPrevOnEmpty(t *testing.T) {
-	m := NewWithStringComparator()
+func TestMultiMapIteratorPrevOnEmpty(t *testing.T) {
+	m := NewMultiWithStringComparator()
 	it := m.Iterator()
 	it = m.Iterator()
 	for it.Prev() {
@@ -364,8 +346,8 @@ func TestMapIteratorPrevOnEmpty(t *testing.T) {
 	}
 }
 
-func TestMapIteratorNext(t *testing.T) {
-	m := NewWithStringComparator()
+func TestMultiMapIteratorNext(t *testing.T) {
+	m := NewMultiWithStringComparator()
 	m.Put("c", 3)
 	m.Put("a", 1)
 	m.Put("b", 2)
@@ -401,8 +383,8 @@ func TestMapIteratorNext(t *testing.T) {
 	}
 }
 
-func TestMapIteratorPrev(t *testing.T) {
-	m := NewWithStringComparator()
+func TestMultiMapIteratorPrev(t *testing.T) {
+	m := NewMultiWithStringComparator()
 	m.Put("c", 3)
 	m.Put("a", 1)
 	m.Put("b", 2)
@@ -440,8 +422,8 @@ func TestMapIteratorPrev(t *testing.T) {
 	}
 }
 
-func TestMapIteratorBegin(t *testing.T) {
-	m := NewWithIntComparator()
+func TestMultiMapIteratorBegin(t *testing.T) {
+	m := NewMultiWithIntComparator()
 	it := m.Iterator()
 	it.Begin()
 	m.Put(3, "c")
@@ -456,8 +438,8 @@ func TestMapIteratorBegin(t *testing.T) {
 	}
 }
 
-func TestMapTreeIteratorEnd(t *testing.T) {
-	m := NewWithIntComparator()
+func TestMultiMapTreeIteratorEnd(t *testing.T) {
+	m := NewMultiWithIntComparator()
 	it := m.Iterator()
 	m.Put(3, "c")
 	m.Put(1, "a")
@@ -469,8 +451,8 @@ func TestMapTreeIteratorEnd(t *testing.T) {
 	}
 }
 
-func TestMapIteratorFirst(t *testing.T) {
-	m := NewWithIntComparator()
+func TestMultiMapIteratorFirst(t *testing.T) {
+	m := NewMultiWithIntComparator()
 	m.Put(3, "c")
 	m.Put(1, "a")
 	m.Put(2, "b")
@@ -483,8 +465,8 @@ func TestMapIteratorFirst(t *testing.T) {
 	}
 }
 
-func TestMapIteratorLast(t *testing.T) {
-	m := NewWithIntComparator()
+func TestMultiMapIteratorLast(t *testing.T) {
+	m := NewMultiWithIntComparator()
 	m.Put(3, "c")
 	m.Put(1, "a")
 	m.Put(2, "b")
@@ -497,22 +479,22 @@ func TestMapIteratorLast(t *testing.T) {
 	}
 }
 
-func TestMapSerialization(t *testing.T) {
+func TestMultiMapSerialization(t *testing.T) {
 	for i := 0; i < 10; i++ {
-		original := NewWithStringComparator()
+		original := NewMultiWithStringComparator()
 		original.Put("d", "4")
 		original.Put("e", "5")
 		original.Put("c", "3")
 		original.Put("b", "2")
 		original.Put("a", "1")
 
-		assertSerialization(original, "A", t)
+		assertMultiSerialization(original, "A", t)
 
 		serialized, err := original.ToJSON()
 		if err != nil {
 			t.Errorf("Got error %v", err)
 		}
-		assertSerialization(original, "B", t)
+		assertMultiSerialization(original, "B", t)
 
 		deserialized := NewWithStringComparator()
 		err = deserialized.FromJSON(serialized)
@@ -524,7 +506,7 @@ func TestMapSerialization(t *testing.T) {
 }
 
 //noinspection GoBoolExpressions
-func assertSerialization(m *Map, txt string, t *testing.T) {
+func assertMultiSerialization(m *MultiMap, txt string, t *testing.T) {
 	if actualValue := m.Keys(); false ||
 		actualValue[0].(string) != "a" ||
 		actualValue[1].(string) != "b" ||
@@ -546,7 +528,7 @@ func assertSerialization(m *Map, txt string, t *testing.T) {
 	}
 }
 
-func benchmarkGet(b *testing.B, m *Map, size int) {
+func benchmarkMultiGet(b *testing.B, m *MultiMap, size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
 			m.Get(n)
@@ -554,7 +536,7 @@ func benchmarkGet(b *testing.B, m *Map, size int) {
 	}
 }
 
-func benchmarkPut(b *testing.B, m *Map, size int) {
+func benchmarkMultiPut(b *testing.B, m *MultiMap, size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
 			m.Put(n, struct{}{})
@@ -562,7 +544,7 @@ func benchmarkPut(b *testing.B, m *Map, size int) {
 	}
 }
 
-func benchmarkRemove(b *testing.B, m *Map, size int) {
+func benchmarkMultiRemove(b *testing.B, m *MultiMap, size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
 			m.Remove(n)
@@ -570,132 +552,131 @@ func benchmarkRemove(b *testing.B, m *Map, size int) {
 	}
 }
 
-func BenchmarkTreeMapGet100(b *testing.B) {
+func BenchmarkTreeMultiMapGet100(b *testing.B) {
 	b.StopTimer()
 	size := 100
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkGet(b, m, size)
+	benchmarkMultiGet(b, m, size)
 }
 
-func BenchmarkTreeMapGet1000(b *testing.B) {
+func BenchmarkTreeMultiMapGet1000(b *testing.B) {
 	b.StopTimer()
 	size := 1000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkGet(b, m, size)
+	benchmarkMultiGet(b, m, size)
 }
 
-func BenchmarkTreeMapGet10000(b *testing.B) {
+func BenchmarkTreeMultiMapGet10000(b *testing.B) {
 	b.StopTimer()
 	size := 10000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkGet(b, m, size)
+	benchmarkMultiGet(b, m, size)
 }
 
-func BenchmarkTreeMapGet100000(b *testing.B) {
+func BenchmarkTreeMultiMapGet100000(b *testing.B) {
 	b.StopTimer()
 	size := 100000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkGet(b, m, size)
+	benchmarkMultiGet(b, m, size)
 }
 
-func BenchmarkTreeMapPut100(b *testing.B) {
+func BenchmarkTreeMultiMapPut100(b *testing.B) {
 	b.StopTimer()
 	size := 100
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	b.StartTimer()
-	benchmarkPut(b, m, size)
+	benchmarkMultiPut(b, m, size)
 }
 
-func BenchmarkTreeMapPut1000(b *testing.B) {
+func BenchmarkTreeMultiMapPut1000(b *testing.B) {
 	b.StopTimer()
 	size := 1000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkPut(b, m, size)
+	benchmarkMultiPut(b, m, size)
 }
 
-func BenchmarkTreeMapPut10000(b *testing.B) {
+func BenchmarkTreeMultiMapPut10000(b *testing.B) {
 	b.StopTimer()
 	size := 10000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkPut(b, m, size)
+	benchmarkMultiPut(b, m, size)
 }
 
-func BenchmarkTreeMapPut100000(b *testing.B) {
+func BenchmarkTreeMultiMapPut100000(b *testing.B) {
 	b.StopTimer()
 	size := 100000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkPut(b, m, size)
+	benchmarkMultiPut(b, m, size)
 }
 
-func BenchmarkTreeMapRemove100(b *testing.B) {
+func BenchmarkTreeMultiMapRemove100(b *testing.B) {
 	b.StopTimer()
 	size := 100
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkRemove(b, m, size)
+	benchmarkMultiRemove(b, m, size)
 }
 
-func BenchmarkTreeMapRemove1000(b *testing.B) {
+func BenchmarkTreeMultiMapRemove1000(b *testing.B) {
 	b.StopTimer()
 	size := 1000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkRemove(b, m, size)
+	benchmarkMultiRemove(b, m, size)
 }
 
-func BenchmarkTreeMapRemove10000(b *testing.B) {
+func BenchmarkTreeMultiMapRemove10000(b *testing.B) {
 	b.StopTimer()
 	size := 10000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkRemove(b, m, size)
+	benchmarkMultiRemove(b, m, size)
 }
 
-func BenchmarkTreeMapRemove100000(b *testing.B) {
+func BenchmarkTreeMultiMapRemove100000(b *testing.B) {
 	b.StopTimer()
 	size := 100000
-	m := NewWithIntComparator()
+	m := NewMultiWithIntComparator()
 	for n := 0; n < size; n++ {
 		m.Put(n, struct{}{})
 	}
 	b.StartTimer()
-	benchmarkRemove(b, m, size)
+	benchmarkMultiRemove(b, m, size)
 }
-**/

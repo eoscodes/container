@@ -59,7 +59,7 @@ func CopyFromMulti(ts *MultiSet) *MultiSet {
 	return &MultiSet{tree: rbt.CopyFrom(ts.tree)}
 }
 
-func MultiSetIntersection(a *Set, b *Set, callback func(elem interface{})) {
+func MultiSetIntersection(a *MultiSet, b *MultiSet, callback func(elem interface{})) {
 	aIterator := a.Iterator()
 	bIterator := b.Iterator()
 

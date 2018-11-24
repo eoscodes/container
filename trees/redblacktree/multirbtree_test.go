@@ -594,6 +594,9 @@ func benchmarkMultiGet(b *testing.B, tree *Tree, size int) {
 
 func benchmarkMultiPut(b *testing.B, tree *Tree, size int) {
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		tree.Clear()
+		b.StartTimer()
 		for n := 0; n < size; n++ {
 			tree.MultiPut(n, struct{}{})
 		}

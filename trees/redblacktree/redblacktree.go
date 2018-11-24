@@ -362,7 +362,10 @@ func (tree *Tree) String() string {
 }
 
 func (node *Node) String() string {
-	return fmt.Sprintf("%v", node.Key)
+	if !node.color {
+		return fmt.Sprintf("(%v:%v)", node.Key, "red")
+	}
+	return fmt.Sprintf("(%v)", node.Key)
 }
 
 func output(node *Node, prefix string, isTail bool, str *string) {

@@ -599,6 +599,9 @@ func benchmarkGet(b *testing.B, tree *Tree, size int) {
 
 func benchmarkPut(b *testing.B, tree *Tree, size int) {
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		tree.Clear()
+		b.StartTimer()
 		for n := 0; n < size; n++ {
 			tree.Put(n, struct{}{})
 		}
