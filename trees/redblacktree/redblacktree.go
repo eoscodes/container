@@ -161,6 +161,7 @@ func (tree *Tree) PutItem(key interface{}, value interface{}) (bool , interface{
 				resultOpt=false
 				resultKey = key
 				resultValue = value
+				loop = false
 			case compare < 0:
 				if node.Left == nil {
 					node.Left = &Node{Key: key, Value: value, color: red}
