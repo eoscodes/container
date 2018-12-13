@@ -474,7 +474,7 @@ func (tree *Tree) lookupEqual(key interface{}) (Iterator, bool) {
 		case compare == 0:
 			iterator := Iterator{tree: tree, node: node, position: between}
 			for iterator.Prev() {
-				if iterator.Key() != node.Key {
+				if tree.Comparator(iterator.Key(), node.Key) != 0 {
 					break
 				}
 			}
