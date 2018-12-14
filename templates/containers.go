@@ -6,11 +6,8 @@ type Container interface {
 	Size() int
 	Clear()
 
+	Serializer
 }
-
-///go:generate go test -v github.com/ncw/gotemplate/...
-//go:generate gotemplate "github.com/eosspark/container/templates/treeset" AccountNameSet(common.AccountName,common.CompareName)
-
 
 type Serializer interface {
 	ToJSON() ([]byte, error)
@@ -19,12 +16,8 @@ type Serializer interface {
 
 type Set interface {
 	Container
-	Serializer
 }
 
 type Map interface {
 	Container
-	Serializer
 }
-
-type A = int
