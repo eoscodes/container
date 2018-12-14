@@ -12,7 +12,8 @@ package treeset
 import (
 	"encoding/json"
 	"fmt"
-	_ "github.com/eosspark/container/templates"
+	"github.com/eosspark/container/sets"
+	"github.com/eosspark/container/templates"
 	rbt "github.com/eosspark/container/trees/redblacktree"
 	"github.com/eosspark/container/utils"
 	"strings"
@@ -21,8 +22,10 @@ import (
 // template type Set(V,Compare)
 type V = int
 
+type C = sets.TSet
+
 func assertSetImplementation() {
-	//var _ sets.Set = (*Set)(nil)
+	var _ templates.Set = (*Set)(nil)
 }
 
 func Compare(a, b interface{}) int {
