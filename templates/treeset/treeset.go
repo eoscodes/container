@@ -12,24 +12,34 @@ package treeset
 import (
 	"encoding/json"
 	"fmt"
+	_ "github.com/eosspark/container/templates"
 	rbt "github.com/eosspark/container/trees/redblacktree"
 	"github.com/eosspark/container/utils"
 	"strings"
 )
 
-//func assertSetImplementation() {
-//	var _ sets.Set = (*Set)(nil)
-//}
-type Comparable interface {
-	Compare(c Comparable) int
+// template type Set(V,Compare)
+type V = int
+
+func assertSetImplementation() {
+	//var _ sets.Set = (*Set)(nil)
 }
 
-// template type Set(V)
-type V = Comparable
+func Compare(a, b interface{}) int {
+	ai := a.(int)
+	bi := b.(int)
+	if ai > bi {
+		return 1
+	} else if ai < bi {
+		return -1
+	} else {
+		return 0
+	}
+}
 
 // Set holds elements in a red-black tree
 type Set struct {
-	tree      *rbt.Tree
+	tree *rbt.Tree
 }
 
 var itemExists = struct{}{}
@@ -37,18 +47,16 @@ var itemExists = struct{}{}
 // NewWith instantiates a new empty set with the custom comparator.
 
 func New(Value ...V) *Set {
-	return &Set{tree: rbt.NewWith(func(a, b interface{}) int {
-		return a.(V).Compare(b.(V))
-	})}
-}
-func NewWith(comparator utils.Comparator, values ...V) *Set {
-	set := &Set{tree: rbt.NewWith(comparator)}
-	if len(values) > 0 {
-		set.Add(values...)
-	}
-	return set
+	return &Set{tree: rbt.NewWith(Compare)}
 }
 
+//func NewWith(comparator utils.Comparator, values ...V) *Set {
+//	set := &Set{tree: rbt.NewWith(comparator)}
+//	if len(values) > 0 {
+//		set.Add(values...)
+//	}
+//	return set
+//}
 
 func CopyFrom(ts *Set) *Set {
 	return &Set{tree: rbt.CopyFrom(ts.tree)}
@@ -225,7 +233,6 @@ func (iterator *Iterator) Last() bool {
 	iterator.End()
 	return iterator.Prev()
 }
-
 
 // Each calls the given function once for each element, passing that element's index and value.
 func (set *Set) Each(f func(index int, value V)) {
