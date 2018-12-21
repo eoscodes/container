@@ -7,7 +7,6 @@ package treeset
 import (
 	"fmt"
 	"github.com/eosspark/eos-go/log"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -545,7 +544,9 @@ func TestMultiSet_UpperBound(t *testing.T) {
 	if u != nil {
 		log.Info("%v", u.Value())
 	}
-	assert.Equal(t, "b", u.Value())
+	if u.Value() != "b" {
+		t.Fatalf("got %s except b", u.Value())
+	}
 }
 
 func TestMultiSet_LowerBound(t *testing.T) {
@@ -586,5 +587,8 @@ func TestMultiSet_easer(t *testing.T) {
 	for itr.Next() {
 		fmt.Println(itr.Value())
 	}
-	assert.Equal(t, 4, set.Size())
+
+	if set.Size() != 4 {
+		t.Fatalf("got %d expect 4", set.Size())
+	}
 }

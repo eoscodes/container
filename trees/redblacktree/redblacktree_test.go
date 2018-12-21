@@ -6,7 +6,6 @@ package redblacktree
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"testing"
 )
@@ -604,23 +603,31 @@ func TestRedBlackTreeLowerUpperBound(t *testing.T) {
 	tree.MultiPut(6, 61)
 	tree.MultiPut(6, 62)
 
+	assert := func(actual, expect int) {
+		if actual != expect {
+			t.Fatalf("got %d, but expected %d", actual, expect)
+		}
+	}
+
 	lower := tree.LowerBound(3)
 	upper := tree.UpperBound(3)
 
-	assert.Equal(t, 31, lower.node.Value)
-	assert.Equal(t, 41, upper.node.Value)
+	assert(31, lower.node.Value.(int))
+	assert(41, upper.node.Value.(int))
 
 	lower = tree.LowerBound(6)
 	upper = tree.UpperBound(6)
 
-	assert.Equal(t, 61, lower.node.Value)
-	assert.Equal(t, tree.End(), upper)
+	assert(61, lower.node.Value.(int))
+	if upper != tree.End() {
+		t.Fatal("upper expected error")
+	}
 
 	lower = tree.LowerBound(1)
 	upper = tree.UpperBound(1)
 
-	assert.Equal(t, 1, lower.node.Value)
-	assert.Equal(t, 2, upper.node.Value)
+	assert(1, lower.node.Value.(int))
+	assert(2, upper.node.Value.(int))
 }
 
 func benchmarkGet(b *testing.B, tree *Tree, size int) {
