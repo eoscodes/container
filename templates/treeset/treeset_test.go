@@ -330,10 +330,10 @@ func TestSetSerialization(t *testing.T) {
 
 	assert()
 
-	json, err := set.ToJSON()
+	json, err := set.MarshalJSON()
 	assert()
 
-	err = set.FromJSON(json)
+	err = set.UnmarshalJSON(json)
 	assert()
 }
 

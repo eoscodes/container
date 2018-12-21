@@ -32,7 +32,8 @@ func assertMapImplementation() {
 
 // Map holds the elements in a red-black tree
 type Map struct {
-	tree *rbt.Tree
+	isMulti bool
+	tree    *rbt.Tree
 }
 
 // NewWith instantiates a tree map with the custom comparator.
@@ -51,7 +52,11 @@ func (m *Map) GetComparator() utils.Comparator {
 // Put inserts key-value pair into the map.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
 func (m *Map) Put(key K, value V) {
-	m.tree.Put(key, value)
+	if m.isMulti {
+		m.tree.MultiPut(key, value)
+	} else {
+		m.tree.Put(key, value)
+	}
 }
 
 // Get searches the element in the map by key and returns its value or nil if key is not found in tree.
@@ -67,7 +72,11 @@ func (m *Map) Get(key K) (value V, found bool) {
 // Remove removes the element from the map by key.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
 func (m *Map) Remove(key K) {
-	m.tree.Remove(key)
+	if m.isMulti {
+		m.tree.MultiRemove(key)
+	} else {
+		m.tree.Remove(key)
+	}
 }
 
 // Empty returns true if map does not contain any elements
@@ -306,7 +315,7 @@ type pair struct {
 	Val V
 }
 
-func (m *Map) ToJSON() ([]byte, error) {
+func (m *Map) MarshalJSON() ([]byte, error) {
 	elements := make([]pair, 0, m.Size())
 	it := m.Iterator()
 	for it.Next() {
@@ -316,7 +325,7 @@ func (m *Map) ToJSON() ([]byte, error) {
 }
 
 // FromJSON populates the map from the input JSON representation.
-func (m *Map) FromJSON(data []byte) error {
+func (m *Map) UnmarshalJSON(data []byte) error {
 	elements := make([]pair, 0)
 	err := json.Unmarshal(data, &elements)
 	if err == nil {
@@ -333,15 +342,7 @@ type MultiMap struct {
 }
 
 func NewMulti() *MultiMap {
-	return &MultiMap{Map{tree: rbt.NewWith(Compare)}}
-}
-
-func (m *MultiMap) Put(key K, value V) {
-	m.tree.MultiPut(key, value)
-}
-
-func (m *MultiMap) Remove(key K, value V) {
-	m.tree.MultiRemove(key)
+	return &MultiMap{Map{tree: rbt.NewWith(Compare), isMulti: true}}
 }
 
 func (m *MultiMap) Get(key K) (front, end Iterator) {

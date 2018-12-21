@@ -29,7 +29,8 @@ func assertStringSetImplementation() {
 
 // Set holds elements in a red-black tree
 type StringSet struct {
-	tree *rbt.Tree
+	isMulti bool
+	tree    *rbt.Tree
 }
 
 var itemExistsStringSet = struct{}{}
@@ -97,15 +98,27 @@ func (set *StringSet) AddItem(item string) (bool, string) {
 
 // Add adds the items (one or more) to the set.
 func (set *StringSet) Add(items ...string) {
-	for _, item := range items {
-		set.tree.Put(item, itemExistsStringSet)
+	if set.isMulti {
+		for _, item := range items {
+			set.tree.MultiPut(item, itemExistsStringSet)
+		}
+	} else {
+		for _, item := range items {
+			set.tree.Put(item, itemExistsStringSet)
+		}
 	}
 }
 
 // Remove removes the items (one or more) from the set.
 func (set *StringSet) Remove(items ...string) {
-	for _, item := range items {
-		set.tree.Remove(item)
+	if set.isMulti {
+		for _, item := range items {
+			set.tree.MultiRemove(item)
+		}
+	} else {
+		for _, item := range items {
+			set.tree.Remove(item)
+		}
 	}
 
 }
@@ -286,12 +299,12 @@ func (set *StringSet) Find(f func(value string) bool) (v string) {
 }
 
 // ToJSON outputs the JSON representation of the set.
-func (set *StringSet) ToJSON() ([]byte, error) {
+func (set *StringSet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(set.Values())
 }
 
 // FromJSON populates the set from the input JSON representation.
-func (set *StringSet) FromJSON(data []byte) error {
+func (set *StringSet) UnmarshalJSON(data []byte) error {
 	elements := make([]string, 0)
 	err := json.Unmarshal(data, &elements)
 	if err == nil {
@@ -306,25 +319,13 @@ type MultiStringSet struct {
 }
 
 func NewMultiStringSet(items ...string) *MultiStringSet {
-	multiset := &MultiStringSet{StringSet{tree: rbt.NewWith(utils.StringComparator)}}
+	multiset := &MultiStringSet{StringSet{tree: rbt.NewWith(utils.StringComparator), isMulti: true}}
 	multiset.Add(items...)
 	return multiset
 }
 
 func CopyMultiFromStringSet(mts *MultiStringSet) *MultiStringSet {
 	return &MultiStringSet{StringSet{tree: rbt.CopyFrom(mts.tree)}}
-}
-
-func (set *MultiStringSet) Add(items ...string) {
-	for _, item := range items {
-		set.tree.MultiPut(item, itemExistsStringSet)
-	}
-}
-
-func (set *MultiStringSet) Remove(items ...string) {
-	for _, item := range items {
-		set.tree.MultiRemove(item)
-	}
 }
 
 func (set *MultiStringSet) Get(item string) (front, end IteratorStringSet) {

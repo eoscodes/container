@@ -23,8 +23,8 @@ func TestMapPut(t *testing.T) {
 	m.Put(1, "a") //overwrite
 
 	assert.Equal(t, 7, m.Size())
-	assert.EqualValues(t, []int{1, 2, 3, 4, 5, 6, 7},  m.Keys())
-	assert.EqualValues(t,  []string{"a", "b", "c", "d", "e", "f", "g"}, m.Values())
+	assert.EqualValues(t, []int{1, 2, 3, 4, 5, 6, 7}, m.Keys())
+	assert.EqualValues(t, []string{"a", "b", "c", "d", "e", "f", "g"}, m.Values())
 
 	// key,expectedValue,expectedFound
 	tests1 := [][]interface{}{
@@ -193,6 +193,29 @@ func TestMapEach(t *testing.T) {
 			t.Errorf("Too many")
 		}
 	})
+}
+
+func TestMapSerialization(t *testing.T) {
+	original := NewIntStringMap()
+	original.Put(4, "4")
+	original.Put(5, "5")
+	original.Put(3, "3")
+	original.Put(2, "2")
+	original.Put(1, "1")
+
+	serialized, err := original.MarshalJSON()
+	if err != nil {
+		t.Errorf("Got error %v", err)
+	}
+
+	deserialized := NewIntStringMap()
+	err = deserialized.UnmarshalJSON(serialized)
+	if err != nil {
+		t.Errorf("Got error %v", err)
+	}
+
+	assert.Equal(t, []int{1,2,3,4,5}, deserialized.Keys())
+	assert.Equal(t, []string{"1","2","3","4","5"}, deserialized.Values())
 }
 
 /**
@@ -469,31 +492,6 @@ func TestMapIteratorLast(t *testing.T) {
 	}
 }
 
-func TestMapSerialization(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		original := NewWithStringComparator(utils.TypeString)
-		original.Put("d", "4")
-		original.Put("e", "5")
-		original.Put("c", "3")
-		original.Put("b", "2")
-		original.Put("a", "1")
-
-		assertSerialization(original, "A", t)
-
-		serialized, err := original.ToJSON()
-		if err != nil {
-			t.Errorf("Got error %v", err)
-		}
-		assertSerialization(original, "B", t)
-
-		deserialized := NewWithStringComparator(utils.TypeString)
-		err = deserialized.FromJSON(serialized)
-		if err != nil {
-			t.Errorf("Got error %v", err)
-		}
-		assertSerialization(deserialized, "C", t)
-	}
-}
 
 //noinspection GoBoolExpressions
 func assertSerialization(m *Map, txt string, t *testing.T) {

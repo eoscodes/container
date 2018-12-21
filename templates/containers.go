@@ -1,6 +1,5 @@
 package templates
 
-
 type Container interface {
 	Empty() bool
 	Size() int
@@ -10,8 +9,8 @@ type Container interface {
 }
 
 type Serializer interface {
-	ToJSON() ([]byte, error)
-	FromJSON([]byte) error
+	MarshalJSON() ([]byte, error)
+	UnmarshalJSON([]byte) error
 }
 
 type Set interface {

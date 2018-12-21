@@ -31,7 +31,8 @@ func assertIntStringMapImplementation() {
 
 // Map holds the elements in a red-black tree
 type IntStringMap struct {
-	tree *rbt.Tree
+	isMulti bool
+	tree    *rbt.Tree
 }
 
 // NewWith instantiates a tree map with the custom comparator.
@@ -50,7 +51,11 @@ func (m *IntStringMap) GetComparator() utils.Comparator {
 // Put inserts key-value pair into the map.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
 func (m *IntStringMap) Put(key int, value string) {
-	m.tree.Put(key, value)
+	if m.isMulti {
+		m.tree.MultiPut(key, value)
+	} else {
+		m.tree.Put(key, value)
+	}
 }
 
 // Get searches the element in the map by key and returns its value or nil if key is not found in tree.
@@ -66,7 +71,11 @@ func (m *IntStringMap) Get(key int) (value string, found bool) {
 // Remove removes the element from the map by key.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
 func (m *IntStringMap) Remove(key int) {
-	m.tree.Remove(key)
+	if m.isMulti {
+		m.tree.MultiRemove(key)
+	} else {
+		m.tree.Remove(key)
+	}
 }
 
 // Empty returns true if map does not contain any elements
@@ -305,7 +314,7 @@ type pairIntStringMap struct {
 	Val string
 }
 
-func (m *IntStringMap) ToJSON() ([]byte, error) {
+func (m *IntStringMap) MarshalJSON() ([]byte, error) {
 	elements := make([]pairIntStringMap, 0, m.Size())
 	it := m.Iterator()
 	for it.Next() {
@@ -315,7 +324,7 @@ func (m *IntStringMap) ToJSON() ([]byte, error) {
 }
 
 // FromJSON populates the map from the input JSON representation.
-func (m *IntStringMap) FromJSON(data []byte) error {
+func (m *IntStringMap) UnmarshalJSON(data []byte) error {
 	elements := make([]pairIntStringMap, 0)
 	err := json.Unmarshal(data, &elements)
 	if err == nil {
@@ -332,15 +341,7 @@ type MultiIntStringMap struct {
 }
 
 func NewMultiIntStringMap() *MultiIntStringMap {
-	return &MultiIntStringMap{IntStringMap{tree: rbt.NewWith(utils.IntComparator)}}
-}
-
-func (m *MultiIntStringMap) Put(key int, value string) {
-	m.tree.MultiPut(key, value)
-}
-
-func (m *MultiIntStringMap) Remove(key int, value string) {
-	m.tree.MultiRemove(key)
+	return &MultiIntStringMap{IntStringMap{tree: rbt.NewWith(utils.IntComparator), isMulti: true}}
 }
 
 func (m *MultiIntStringMap) Get(key int) (front, end IteratorIntStringMap) {

@@ -29,7 +29,8 @@ func assertSetImplementation() {
 
 // Set holds elements in a red-black tree
 type Set struct {
-	tree *rbt.Tree
+	isMulti bool
+	tree    *rbt.Tree
 }
 
 var itemExists = struct{}{}
@@ -97,15 +98,27 @@ func (set *Set) AddItem(item V) (bool, V) {
 
 // Add adds the items (one or more) to the set.
 func (set *Set) Add(items ...V) {
-	for _, item := range items {
-		set.tree.Put(item, itemExists)
+	if set.isMulti {
+		for _, item := range items {
+			set.tree.MultiPut(item, itemExists)
+		}
+	} else {
+		for _, item := range items {
+			set.tree.Put(item, itemExists)
+		}
 	}
 }
 
 // Remove removes the items (one or more) from the set.
 func (set *Set) Remove(items ...V) {
-	for _, item := range items {
-		set.tree.Remove(item)
+	if set.isMulti {
+		for _, item := range items {
+			set.tree.MultiRemove(item)
+		}
+	} else {
+		for _, item := range items {
+			set.tree.Remove(item)
+		}
 	}
 
 }
@@ -286,12 +299,12 @@ func (set *Set) Find(f func(value V) bool) (v V) {
 }
 
 // ToJSON outputs the JSON representation of the set.
-func (set *Set) ToJSON() ([]byte, error) {
+func (set *Set) MarshalJSON() ([]byte, error) {
 	return json.Marshal(set.Values())
 }
 
 // FromJSON populates the set from the input JSON representation.
-func (set *Set) FromJSON(data []byte) error {
+func (set *Set) UnmarshalJSON(data []byte) error {
 	elements := make([]V, 0)
 	err := json.Unmarshal(data, &elements)
 	if err == nil {
@@ -306,25 +319,13 @@ type MultiSet struct {
 }
 
 func NewMulti(items ...V) *MultiSet {
-	multiset := &MultiSet{Set{tree: rbt.NewWith(Compare)}}
+	multiset := &MultiSet{Set{tree: rbt.NewWith(Compare), isMulti: true}}
 	multiset.Add(items...)
 	return multiset
 }
 
 func CopyMultiFrom(mts *MultiSet) *MultiSet {
 	return &MultiSet{Set{tree: rbt.CopyFrom(mts.tree)}}
-}
-
-func (set *MultiSet) Add(items ...V) {
-	for _, item := range items {
-		set.tree.MultiPut(item, itemExists)
-	}
-}
-
-func (set *MultiSet) Remove(items ...V) {
-	for _, item := range items {
-		set.tree.MultiRemove(item)
-	}
 }
 
 func (set *MultiSet) Get(item V) (front, end Iterator) {
