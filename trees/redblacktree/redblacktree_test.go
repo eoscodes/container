@@ -6,8 +6,9 @@ package redblacktree
 
 import (
 	"fmt"
-	"testing"
+	"github.com/stretchr/testify/assert"
 	"math/rand"
+	"testing"
 )
 
 func TestRedBlackTreePut(t *testing.T) {
@@ -589,6 +590,39 @@ func TestRedBlackTreeSerialization(t *testing.T) {
 	assert()
 }
 
+func TestRedBlackTreeLowerUpperBound(t *testing.T) {
+	tree := NewWithIntComparator()
+	tree.MultiPut(1, 1)
+	tree.MultiPut(2, 2)
+	tree.MultiPut(3, 31)
+	tree.MultiPut(3, 32)
+	tree.MultiPut(3, 33)
+	tree.MultiPut(3, 34)
+	tree.MultiPut(4, 41)
+	tree.MultiPut(4, 42)
+	tree.MultiPut(5, 5)
+	tree.MultiPut(6, 61)
+	tree.MultiPut(6, 62)
+
+	lower := tree.LowerBound(3)
+	upper := tree.UpperBound(3)
+
+	assert.Equal(t, 31, lower.node.Value)
+	assert.Equal(t, 41, upper.node.Value)
+
+	lower = tree.LowerBound(6)
+	upper = tree.UpperBound(6)
+
+	assert.Equal(t, 61, lower.node.Value)
+	assert.Equal(t, tree.End(), upper)
+
+	lower = tree.LowerBound(1)
+	upper = tree.UpperBound(1)
+
+	assert.Equal(t, 1, lower.node.Value)
+	assert.Equal(t, 2, upper.node.Value)
+}
+
 func benchmarkGet(b *testing.B, tree *Tree, size int) {
 	for i := 0; i < b.N; i++ {
 		for n := 0; n < size; n++ {
@@ -755,7 +789,7 @@ func BenchmarkIterator_Next(b *testing.B) {
 
 	itr := tree.Iterator()
 	b.StartTimer()
-		for itr.Next() {
+	for itr.Next() {
 
 	}
 	benchmarkRemove(b, tree, size)

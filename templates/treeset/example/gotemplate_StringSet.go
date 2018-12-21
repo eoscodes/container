@@ -32,9 +32,6 @@ type StringSet struct {
 	tree *rbt.Tree
 }
 
-type MultiStringSet struct {
-}
-
 var itemExistsStringSet = struct{}{}
 
 // NewWith instantiates a new empty set with the custom comparator.
@@ -44,6 +41,12 @@ func NewStringSet(Value ...string) *StringSet {
 	set.Add(Value...)
 	return set
 }
+
+//func (set *Set) New(Value ...V)  {
+//	set := &Set{tree: rbt.NewWith(Compare)}
+//	set.Add(Value...)
+//	return set
+//}
 
 //func NewWith(comparator utils.Comparator, values ...V) *Set {
 //	set := &Set{tree: rbt.NewWith(comparator)}
@@ -104,6 +107,7 @@ func (set *StringSet) Remove(items ...string) {
 	for _, item := range items {
 		set.tree.Remove(item)
 	}
+
 }
 
 // Contains checks weather items (one or more) are present in the set.
@@ -146,7 +150,7 @@ func (set *StringSet) Values() []string {
 // String returns a string representation of container
 func (set *StringSet) String() string {
 	str := "TreeSet\n"
-	items := []string{}
+	items := make([]string, 0)
 	for _, v := range set.tree.Keys() {
 		items = append(items, fmt.Sprintf("%v", v))
 	}
@@ -156,14 +160,12 @@ func (set *StringSet) String() string {
 
 // Iterator returns a stateful iterator whose values can be fetched by an index.
 type IteratorStringSet struct {
-	index    int
 	iterator rbt.Iterator
-	tree     *rbt.Tree
 }
 
 // Iterator holding the iterator's state
 func (set *StringSet) Iterator() IteratorStringSet {
-	return IteratorStringSet{index: -1, iterator: set.tree.Iterator(), tree: set.tree}
+	return IteratorStringSet{iterator: set.tree.Iterator()}
 }
 
 // Next moves the iterator to the next element and returns true if there was a next element in the container.
@@ -171,9 +173,6 @@ func (set *StringSet) Iterator() IteratorStringSet {
 // If Next() was called for the first time, then it will point the iterator to the first element if it exists.
 // Modifies the state of the iterator.
 func (iterator *IteratorStringSet) Next() bool {
-	if iterator.index < iterator.tree.Size() {
-		iterator.index++
-	}
 	return iterator.iterator.Next()
 }
 
@@ -181,9 +180,6 @@ func (iterator *IteratorStringSet) Next() bool {
 // If Prev() returns true, then previous element's index and value can be retrieved by Index() and Value().
 // Modifies the state of the iterator.
 func (iterator *IteratorStringSet) Prev() bool {
-	if iterator.index >= 0 {
-		iterator.index--
-	}
 	return iterator.iterator.Prev()
 }
 
@@ -193,23 +189,15 @@ func (iterator *IteratorStringSet) Value() string {
 	return iterator.iterator.Key().(string)
 }
 
-// Index returns the current element's index.
-// Does not modify the state of the iterator.
-func (iterator *IteratorStringSet) Index() int {
-	return iterator.index
-}
-
 // Begin resets the iterator to its initial state (one-before-first)
 // Call Next() to fetch the first element if any.
 func (iterator *IteratorStringSet) Begin() {
-	iterator.index = -1
 	iterator.iterator.Begin()
 }
 
 // End moves the iterator past the last element (one-past-the-end).
 // Call Prev() to fetch the last element if any.
 func (iterator *IteratorStringSet) End() {
-	iterator.index = iterator.tree.Size()
 	iterator.iterator.End()
 }
 
@@ -230,30 +218,30 @@ func (iterator *IteratorStringSet) Last() bool {
 }
 
 // Each calls the given function once for each element, passing that element's index and value.
-func (set *StringSet) Each(f func(index int, value string)) {
+func (set *StringSet) Each(f func(value string)) {
 	iterator := set.Iterator()
 	for iterator.Next() {
-		f(iterator.Index(), iterator.Value())
+		f(iterator.Value())
 	}
 }
 
 // Map invokes the given function once for each element and returns a
 // container containing the values returned by the given function.
-func (set *StringSet) Map(f func(index int, value string) string) *StringSet {
+func (set *StringSet) Map(f func(value string) string) *StringSet {
 	newSet := &StringSet{tree: rbt.NewWith(set.tree.Comparator)}
 	iterator := set.Iterator()
 	for iterator.Next() {
-		newSet.Add(f(iterator.Index(), iterator.Value()))
+		newSet.Add(f(iterator.Value()))
 	}
 	return newSet
 }
 
 // Select returns a new container containing all elements for which the given function returns a true value.
-func (set *StringSet) Select(f func(index int, value string) bool) *StringSet {
+func (set *StringSet) Select(f func(value string) bool) *StringSet {
 	newSet := &StringSet{tree: rbt.NewWith(set.tree.Comparator)}
 	iterator := set.Iterator()
 	for iterator.Next() {
-		if f(iterator.Index(), iterator.Value()) {
+		if f(iterator.Value()) {
 			newSet.Add(iterator.Value())
 		}
 	}
@@ -262,10 +250,10 @@ func (set *StringSet) Select(f func(index int, value string) bool) *StringSet {
 
 // Any passes each element of the container to the given function and
 // returns true if the function ever returns true for any element.
-func (set *StringSet) Any(f func(index int, value string) bool) bool {
+func (set *StringSet) Any(f func(value string) bool) bool {
 	iterator := set.Iterator()
 	for iterator.Next() {
-		if f(iterator.Index(), iterator.Value()) {
+		if f(iterator.Value()) {
 			return true
 		}
 	}
@@ -274,10 +262,10 @@ func (set *StringSet) Any(f func(index int, value string) bool) bool {
 
 // All passes each element of the container to the given function and
 // returns true if the function returns true for all elements.
-func (set *StringSet) All(f func(index int, value string) bool) bool {
+func (set *StringSet) All(f func(value string) bool) bool {
 	iterator := set.Iterator()
 	for iterator.Next() {
-		if !f(iterator.Index(), iterator.Value()) {
+		if !f(iterator.Value()) {
 			return false
 		}
 	}
@@ -287,14 +275,14 @@ func (set *StringSet) All(f func(index int, value string) bool) bool {
 // Find passes each element of the container to the given function and returns
 // the first (index,value) for which the function is true or -1,nil otherwise
 // if no element matches the criteria.
-func (set *StringSet) Find(f func(index int, value string) bool) (idx int, v string) {
+func (set *StringSet) Find(f func(value string) bool) (v string) {
 	iterator := set.Iterator()
 	for iterator.Next() {
-		if f(iterator.Index(), iterator.Value()) {
-			return iterator.Index(), iterator.Value()
+		if f(iterator.Value()) {
+			return iterator.Value()
 		}
 	}
-	return -1, v
+	return
 }
 
 // ToJSON outputs the JSON representation of the set.
@@ -304,11 +292,56 @@ func (set *StringSet) ToJSON() ([]byte, error) {
 
 // FromJSON populates the set from the input JSON representation.
 func (set *StringSet) FromJSON(data []byte) error {
-	elements := []string{}
+	elements := make([]string, 0)
 	err := json.Unmarshal(data, &elements)
 	if err == nil {
 		set.Clear()
 		set.Add(elements...)
 	}
 	return err
+}
+
+type MultiStringSet struct {
+	StringSet
+}
+
+func NewMultiStringSet(items ...string) *MultiStringSet {
+	multiset := &MultiStringSet{StringSet{tree: rbt.NewWith(utils.StringComparator)}}
+	multiset.Add(items...)
+	return multiset
+}
+
+func CopyMultiFromStringSet(mts *MultiStringSet) *MultiStringSet {
+	return &MultiStringSet{StringSet{tree: rbt.CopyFrom(mts.tree)}}
+}
+
+func (set *MultiStringSet) Add(items ...string) {
+	for _, item := range items {
+		set.tree.MultiPut(item, itemExistsStringSet)
+	}
+}
+
+func (set *MultiStringSet) Remove(items ...string) {
+	for _, item := range items {
+		set.tree.MultiRemove(item)
+	}
+}
+
+func (set *MultiStringSet) Get(item string) (front, end IteratorStringSet) {
+	lower, upper := set.tree.MultiGet(item)
+	return IteratorStringSet{lower}, IteratorStringSet{upper}
+}
+
+func (set *MultiStringSet) LowerBound(item string) *IteratorStringSet {
+	if itr := set.tree.LowerBound(item); itr != set.tree.End() {
+		return &IteratorStringSet{itr}
+	}
+	return nil
+}
+
+func (set *MultiStringSet) UpperBound(item string) *IteratorStringSet {
+	if itr := set.tree.UpperBound(item); itr != set.tree.End() {
+		return &IteratorStringSet{itr}
+	}
+	return nil
 }

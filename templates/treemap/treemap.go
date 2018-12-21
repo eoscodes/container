@@ -327,3 +327,38 @@ func (m *Map) FromJSON(data []byte) error {
 	}
 	return err
 }
+
+type MultiMap struct {
+	Map
+}
+
+func NewMulti() *MultiMap {
+	return &MultiMap{Map{tree: rbt.NewWith(Compare)}}
+}
+
+func (m *MultiMap) Put(key K, value V) {
+	m.tree.MultiPut(key, value)
+}
+
+func (m *MultiMap) Remove(key K, value V) {
+	m.tree.MultiRemove(key)
+}
+
+func (m *MultiMap) Get(key K) (front, end Iterator) {
+	lower, upper := m.tree.MultiGet(key)
+	return Iterator{lower}, Iterator{upper}
+}
+
+func (m *MultiMap) LowerBound(key K) *Iterator {
+	if itr := m.tree.LowerBound(key); itr != m.tree.End() {
+		return &Iterator{itr}
+	}
+	return nil
+}
+
+func (m *MultiMap) UpperBound(key K) *Iterator {
+	if itr := m.tree.UpperBound(key); itr != m.tree.End() {
+		return &Iterator{itr}
+	}
+	return nil
+}

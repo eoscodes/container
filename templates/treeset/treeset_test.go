@@ -82,7 +82,8 @@ func TestSetRemove(t *testing.T) {
 func TestSetEach(t *testing.T) {
 	set := NewStringSet()
 	set.Add("c", "a", "b")
-	set.Each(func(index int, value string) {
+	index := 0
+	set.Each(func(value string) {
 		switch index {
 		case 0:
 			if actualValue, expectedValue := value, "a"; actualValue != expectedValue {
@@ -99,13 +100,14 @@ func TestSetEach(t *testing.T) {
 		default:
 			t.Errorf("Too many")
 		}
+		index ++
 	})
 }
 
 func TestSetMap(t *testing.T) {
 	set := NewStringSet()
 	set.Add("c", "a", "b")
-	mappedSet := set.Map(func(index int, value string) string {
+	mappedSet := set.Map(func(value string) string {
 		return "mapped: " + value
 	})
 	if actualValue, expectedValue := mappedSet.Contains("mapped: a", "mapped: b", "mapped: c"), true; actualValue != expectedValue {
@@ -122,7 +124,7 @@ func TestSetMap(t *testing.T) {
 func TestSetSelect(t *testing.T) {
 	set := NewStringSet()
 	set.Add("c", "a", "b")
-	selectedSet := set.Select(func(index int, value string) bool {
+	selectedSet := set.Select(func(value string) bool {
 		return value >= "a" && value <= "b"
 	})
 	if actualValue, expectedValue := selectedSet.Contains("a", "b"), true; actualValue != expectedValue {
@@ -140,13 +142,13 @@ func TestSetSelect(t *testing.T) {
 func TestSetAny(t *testing.T) {
 	set := NewStringSet()
 	set.Add("c", "a", "b")
-	any := set.Any(func(index int, value string) bool {
+	any := set.Any(func(value string) bool {
 		return value == "c"
 	})
 	if any != true {
 		t.Errorf("Got %v expected %v", any, true)
 	}
-	any = set.Any(func(index int, value string) bool {
+	any = set.Any(func(value string) bool {
 		return value == "x"
 	})
 	if any != false {
@@ -157,13 +159,13 @@ func TestSetAny(t *testing.T) {
 func TestSetAll(t *testing.T) {
 	set := NewStringSet()
 	set.Add("c", "a", "b")
-	all := set.All(func(index int, value string) bool {
+	all := set.All(func(value string) bool {
 		return value >= "a" && value <= "c"
 	})
 	if all != true {
 		t.Errorf("Got %v expected %v", all, true)
 	}
-	all = set.All(func(index int, value string) bool {
+	all = set.All(func(value string) bool {
 		return value >= "a" && value <= "b"
 	})
 	if all != false {
@@ -174,17 +176,17 @@ func TestSetAll(t *testing.T) {
 func TestSetFind(t *testing.T) {
 	set := NewStringSet()
 	set.Add("c", "a", "b")
-	foundIndex, foundValue := set.Find(func(index int, value string) bool {
+	foundValue := set.Find(func(value string) bool {
 		return value == "c"
 	})
-	if foundValue != "c" || foundIndex != 2 {
-		t.Errorf("Got %v at %v expected %v at %v", foundValue, foundIndex, "c", 2)
+	if foundValue != "c" {
+		t.Errorf("Got %v expected %v ", foundValue, "c")
 	}
-	foundIndex, foundValue = set.Find(func(index int, value string) bool {
+	foundValue = set.Find(func(value string) bool {
 		return value == "x"
 	})
-	if foundValue != "" || foundIndex != -1 {
-		t.Errorf("Got %v at %v expected %v at %v", foundValue, foundIndex, nil, nil)
+	if foundValue != "" {
+		t.Errorf("Got %v expected %v ", foundValue, nil)
 	}
 }
 
@@ -216,9 +218,8 @@ func TestSetIteratorNext(t *testing.T) {
 	count := 0
 	for it.Next() {
 		count++
-		index := it.Index()
 		value := it.Value()
-		switch index {
+		switch count - 1 {
 		case 0:
 			if actualValue, expectedValue := value, "a"; actualValue != expectedValue {
 				t.Errorf("Got %v expected %v", actualValue, expectedValue)
@@ -233,9 +234,6 @@ func TestSetIteratorNext(t *testing.T) {
 			}
 		default:
 			t.Errorf("Too many")
-		}
-		if actualValue, expectedValue := index, count-1; actualValue != expectedValue {
-			t.Errorf("Got %v expected %v", actualValue, expectedValue)
 		}
 	}
 	if actualValue, expectedValue := count, 3; actualValue != expectedValue {
@@ -252,26 +250,22 @@ func TestSetIteratorPrev(t *testing.T) {
 	count := 0
 	for it.Next() {
 		count++
-		index := it.Index()
 		value := it.Value()
-		switch index {
-		case 0:
+		switch count {
+		case 1:
 			if actualValue, expectedValue := value, "a"; actualValue != expectedValue {
 				t.Errorf("Got %v expected %v", actualValue, expectedValue)
 			}
-		case 1:
+		case 2:
 			if actualValue, expectedValue := value, "b"; actualValue != expectedValue {
 				t.Errorf("Got %v expected %v", actualValue, expectedValue)
 			}
-		case 2:
+		case 3:
 			if actualValue, expectedValue := value, "c"; actualValue != expectedValue {
 				t.Errorf("Got %v expected %v", actualValue, expectedValue)
 			}
 		default:
 			t.Errorf("Too many")
-		}
-		if actualValue, expectedValue := index, count-1; actualValue != expectedValue {
-			t.Errorf("Got %v expected %v", actualValue, expectedValue)
 		}
 	}
 	if actualValue, expectedValue := count, 3; actualValue != expectedValue {
@@ -288,33 +282,8 @@ func TestSetIteratorBegin(t *testing.T) {
 	}
 	it.Begin()
 	it.Next()
-	if index, value := it.Index(), it.Value(); index != 0 || value != "a" {
-		t.Errorf("Got %v,%v expected %v,%v", index, value, 0, "a")
-	}
-}
-
-func TestSetIteratorEnd(t *testing.T) {
-	set := NewStringSet()
-	it := set.Iterator()
-
-	if index := it.Index(); index != -1 {
-		t.Errorf("Got %v expected %v", index, -1)
-	}
-
-	it.End()
-	if index := it.Index(); index != 0 {
-		t.Errorf("Got %v expected %v", index, 0)
-	}
-
-	set.Add("a", "b", "c")
-	it.End()
-	if index := it.Index(); index != set.Size() {
-		t.Errorf("Got %v expected %v", index, set.Size())
-	}
-
-	it.Prev()
-	if index, value := it.Index(), it.Value(); index != set.Size()-1 || value != "c" {
-		t.Errorf("Got %v,%v expected %v,%v", index, value, set.Size()-1, "c")
+	if value := it.Value(); value != "a" {
+		t.Errorf("Got %v expected %v", value, "a")
 	}
 }
 
@@ -325,8 +294,8 @@ func TestSetIteratorFirst(t *testing.T) {
 	if actualValue, expectedValue := it.First(), true; actualValue != expectedValue {
 		t.Errorf("Got %v expected %v", actualValue, expectedValue)
 	}
-	if index, value := it.Index(), it.Value(); index != 0 || value != "a" {
-		t.Errorf("Got %v,%v expected %v,%v", index, value, 0, "a")
+	if value := it.Value(); value != "a" {
+		t.Errorf("Got %v expected %v", value, "a")
 	}
 }
 
@@ -337,8 +306,8 @@ func TestSetIteratorLast(t *testing.T) {
 	if actualValue, expectedValue := it.Last(), true; actualValue != expectedValue {
 		t.Errorf("Got %v expected %v", actualValue, expectedValue)
 	}
-	if index, value := it.Index(), it.Value(); index != 2 || value != "c" {
-		t.Errorf("Got %v,%v expected %v,%v", index, value, 2, "c")
+	if value := it.Value(); value != "c" {
+		t.Errorf("Got %v expected %v", value, "c")
 	}
 }
 

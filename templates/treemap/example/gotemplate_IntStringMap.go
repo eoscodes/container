@@ -326,3 +326,38 @@ func (m *IntStringMap) FromJSON(data []byte) error {
 	}
 	return err
 }
+
+type MultiIntStringMap struct {
+	IntStringMap
+}
+
+func NewMultiIntStringMap() *MultiIntStringMap {
+	return &MultiIntStringMap{IntStringMap{tree: rbt.NewWith(utils.IntComparator)}}
+}
+
+func (m *MultiIntStringMap) Put(key int, value string) {
+	m.tree.MultiPut(key, value)
+}
+
+func (m *MultiIntStringMap) Remove(key int, value string) {
+	m.tree.MultiRemove(key)
+}
+
+func (m *MultiIntStringMap) Get(key int) (front, end IteratorIntStringMap) {
+	lower, upper := m.tree.MultiGet(key)
+	return IteratorIntStringMap{lower}, IteratorIntStringMap{upper}
+}
+
+func (m *MultiIntStringMap) LowerBound(key int) *IteratorIntStringMap {
+	if itr := m.tree.LowerBound(key); itr != m.tree.End() {
+		return &IteratorIntStringMap{itr}
+	}
+	return nil
+}
+
+func (m *MultiIntStringMap) UpperBound(key int) *IteratorIntStringMap {
+	if itr := m.tree.UpperBound(key); itr != m.tree.End() {
+		return &IteratorIntStringMap{itr}
+	}
+	return nil
+}

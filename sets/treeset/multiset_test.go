@@ -6,9 +6,9 @@ package treeset
 
 import (
 	"fmt"
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"github.com/eosspark/eos-go/log"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestMultiSetNew(t *testing.T) {
@@ -292,7 +292,6 @@ func TestMultiSetIteratorPrev(t *testing.T) {
 	}
 }
 
-
 func TestMultiSetIteratorBegin(t *testing.T) {
 	set := NewMultiWithStringComparator()
 	it := set.Iterator()
@@ -369,7 +368,6 @@ func TestMultiSetSerialization(t *testing.T) {
 	assert()
 }
 
-
 func TestMultiSetIntersection(t *testing.T) {
 	a := NewMultiWithIntComparator(1, 3, 5, 7, 9)
 	b := NewMultiWithIntComparator(2, 3, 7, 10)
@@ -385,7 +383,6 @@ func TestMultiSetIntersection(t *testing.T) {
 
 	fmt.Println(res)
 }
-
 
 func benchmarkMultiContains(b *testing.B, set *MultiSet, size int) {
 	for i := 0; i < b.N; i++ {
@@ -542,18 +539,18 @@ func BenchmarkTreeMultiSetRemove100000(b *testing.B) {
 
 func TestMultiSet_UpperBound(t *testing.T) {
 	set := NewMultiWithStringComparator()
-	set.Add("c", "a", "b","c","c","d")
+	set.Add("c", "a", "b", "c", "c", "d")
 
 	u := set.UpperBound("a")
-	if u!=nil{
-		log.Info("%v",u.Value())
+	if u != nil {
+		log.Info("%v", u.Value())
 	}
-	assert.Equal(t,"b",u.Value())
+	assert.Equal(t, "b", u.Value())
 }
 
 func TestMultiSet_LowerBound(t *testing.T) {
 	set := NewMultiWithStringComparator()
-	set.Add("c", "a", "b","c","c","b","d")
+	set.Add("c", "a", "b", "c", "c", "b", "d")
 	//foundValue, found := set.Find(func(value interface{}) bool {
 	//	return value.(string) == "c"
 	//})
@@ -561,9 +558,9 @@ func TestMultiSet_LowerBound(t *testing.T) {
 	u := set.LowerBound("a")
 	//fmt.Println(u.Next())
 	sec := set.UpperBound("a")
-	for u.Next(){
+	for u.Next() {
 
-		if u.Equal(*sec){
+		if *u == *sec {
 			break
 		}
 		fmt.Print(u.Value())
@@ -571,23 +568,23 @@ func TestMultiSet_LowerBound(t *testing.T) {
 
 }
 
-func TestMultiSet_easer(t *testing.T){
+func TestMultiSet_easer(t *testing.T) {
 	set := NewMultiWithStringComparator()
-	set.Add("c", "a", "b","c","c","b","d")
+	set.Add("c", "a", "b", "c", "c", "b", "d")
 	lb := set.LowerBound("c")
-	up:= set.UpperBound("c")
+	up := set.UpperBound("c")
 
-	for lb.Next(){
-		if lb.iterator.Equal(up.iterator){
+	for lb.Next() {
+		if lb.iterator == up.iterator {
 			break
 		}
-		fmt.Println("lower-upper:",lb.Value())
+		fmt.Println("lower-upper:", lb.Value())
 	}
 	set.tree.MultiRemove("c")
-	itr:=set.Iterator()
+	itr := set.Iterator()
 	itr.Begin()
-	for itr.Next(){
+	for itr.Next() {
 		fmt.Println(itr.Value())
 	}
-	assert.Equal(t,4,set.Size())
+	assert.Equal(t, 4, set.Size())
 }
