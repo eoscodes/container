@@ -6,8 +6,9 @@ package redblacktree
 
 import (
 	"fmt"
+	"github.com/eosspark/container/utils"
+	"math/rand"
 	"testing"
-		"math/rand"
 )
 
 func TestRedBlackTreeMultiPut(t *testing.T) {
@@ -463,6 +464,50 @@ func TestRedBlackMultiTreeIterator4Prev(t *testing.T) {
 	}
 	if actualValue, expectedValue := count, 0; actualValue != expectedValue {
 		t.Errorf("Size different. Got %v expected %v", actualValue, expectedValue)
+	}
+}
+
+func TestRedBlackMultiTreeMultiRemove(t *testing.T) {
+	tree := NewWithIntComparator()
+	tree.MultiPut(1, 11)
+	tree.MultiPut(1, 12)
+	tree.MultiPut(1, 13)
+	tree.MultiPut(2, 21)
+	tree.MultiPut(2, 22)
+	tree.MultiPut(3, 31)
+	tree.MultiPut(3, 32)
+	tree.MultiPut(5, 5)
+	tree.MultiPut(4, 41)
+	tree.MultiPut(4, 42)
+
+	tree.MultiRemove(1)
+	utils.AssertTest(t, []int{21, 22, 31, 32, 41, 42, 5}, tree.Values())
+	tree.MultiRemove(3)
+	utils.AssertTest(t, []int{21, 22, 41, 42, 5}, tree.Values())
+	tree.MultiRemove(5)
+	utils.AssertTest(t, []int{21, 22, 41, 42}, tree.Values())
+}
+
+func TestRedBlackMultiTreeIteratorDelete(t *testing.T) {
+	tree := NewWithIntComparator()
+	tree.MultiPut(1, 11)
+	tree.MultiPut(1, 12)
+	tree.MultiPut(1, 13)
+	tree.MultiPut(2, 21)
+	tree.MultiPut(2, 22)
+	tree.MultiPut(3, 31)
+	tree.MultiPut(3, 32)
+	tree.MultiPut(5, 5)
+	tree.MultiPut(4, 41)
+	tree.MultiPut(4, 42)
+
+	expects := []int{11, 12, 13, 21, 22, 31, 32, 41, 42, 5}
+	index := 1
+
+	itr := tree.Iterator()
+	for itr.First(); itr != tree.End(); index++ {
+		itr.Delete()
+		utils.AssertTest(t, expects[index:], tree.Values())
 	}
 }
 

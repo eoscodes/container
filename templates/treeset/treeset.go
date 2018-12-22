@@ -29,8 +29,8 @@ func assertSetImplementation() {
 
 // Set holds elements in a red-black tree
 type Set struct {
-	isMulti bool
 	tree    *rbt.Tree
+	isMulti bool
 }
 
 var itemExists = struct{}{}
@@ -230,6 +230,13 @@ func (iterator *Iterator) Last() bool {
 	return iterator.Prev()
 }
 
+// Delete remove the node which pointed by the iterator
+// The iterator will move to the next after delete
+// Modifies the state of the iterator.
+func (iterator *Iterator) Delete() {
+	iterator.iterator.Delete()
+}
+
 // Each calls the given function once for each element, passing that element's index and value.
 func (set *Set) Each(f func(value V)) {
 	iterator := set.Iterator()
@@ -298,6 +305,20 @@ func (set *Set) Find(f func(value V) bool) (v V) {
 	return
 }
 
+func (set *Set) LowerBound(item V) *Iterator {
+	if itr := set.tree.LowerBound(item); itr != set.tree.End() {
+		return &Iterator{itr}
+	}
+	return nil
+}
+
+func (set *Set) UpperBound(item V) *Iterator {
+	if itr := set.tree.UpperBound(item); itr != set.tree.End() {
+		return &Iterator{itr}
+	}
+	return nil
+}
+
 // ToJSON outputs the JSON representation of the set.
 func (set *Set) MarshalJSON() ([]byte, error) {
 	return json.Marshal(set.Values())
@@ -325,24 +346,10 @@ func NewMulti(items ...V) *MultiSet {
 }
 
 func CopyMultiFrom(mts *MultiSet) *MultiSet {
-	return &MultiSet{Set{tree: rbt.CopyFrom(mts.tree)}}
+	return &MultiSet{Set{tree: rbt.CopyFrom(mts.tree), isMulti: true}}
 }
 
 func (set *MultiSet) Get(item V) (front, end Iterator) {
 	lower, upper := set.tree.MultiGet(item)
 	return Iterator{lower}, Iterator{upper}
-}
-
-func (set *MultiSet) LowerBound(item V) *Iterator {
-	if itr := set.tree.LowerBound(item); itr != set.tree.End() {
-		return &Iterator{itr}
-	}
-	return nil
-}
-
-func (set *MultiSet) UpperBound(item V) *Iterator {
-	if itr := set.tree.UpperBound(item); itr != set.tree.End() {
-		return &Iterator{itr}
-	}
-	return nil
 }

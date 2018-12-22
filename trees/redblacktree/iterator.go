@@ -28,6 +28,10 @@ func (tree *Tree) Iterator() Iterator {
 	return Iterator{tree: tree, node: nil, position: begin}
 }
 
+func (tree *Tree) Begin() Iterator {
+	return Iterator{tree: tree, node: nil, position: begin}
+}
+
 func (tree *Tree) End() Iterator {
 	return Iterator{tree: tree, node: nil, position: end}
 }
@@ -165,4 +169,13 @@ func (iterator *Iterator) First() bool {
 func (iterator *Iterator) Last() bool {
 	iterator.End()
 	return iterator.Prev()
+}
+
+// Delete remove the node which pointed by the iterator
+// The iterator will move to the next after delete
+// Modifies the state of the iterator.
+func (iterator *Iterator) Delete() {
+	node := iterator.node
+	iterator.Next()
+	iterator.tree.remove(node)
 }

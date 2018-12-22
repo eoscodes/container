@@ -12,6 +12,7 @@ package utils
 import (
 	"fmt"
 	"strconv"
+	"testing"
 )
 
 // ToString converts a value to string.
@@ -43,5 +44,11 @@ func ToString(value interface{}) string {
 		return strconv.FormatBool(value.(bool))
 	default:
 		return fmt.Sprintf("%+v", value)
+	}
+}
+
+func AssertTest(t *testing.T, expect interface{}, actual interface{}) {
+	if expectS, actualS := fmt.Sprint(expect), fmt.Sprint(actual); expectS != actualS {
+		t.Fatalf("expect %s, but got %s", expectS, actualS)
 	}
 }

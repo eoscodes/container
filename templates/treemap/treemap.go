@@ -309,6 +309,27 @@ func (iterator *Iterator) Last() bool {
 	return iterator.iterator.Last()
 }
 
+// Delete remove the node which pointed by the iterator
+// The iterator will move to the next after delete
+// Modifies the state of the iterator.
+func (iterator *Iterator) Delete() {
+	iterator.iterator.Delete()
+}
+
+func (m *Map) LowerBound(key K) *Iterator {
+	if itr := m.tree.LowerBound(key); itr != m.tree.End() {
+		return &Iterator{itr}
+	}
+	return nil
+}
+
+func (m *Map) UpperBound(key K) *Iterator {
+	if itr := m.tree.UpperBound(key); itr != m.tree.End() {
+		return &Iterator{itr}
+	}
+	return nil
+}
+
 // ToJSON outputs the JSON representation of the map.
 type pair struct {
 	Key K
@@ -348,18 +369,4 @@ func NewMulti() *MultiMap {
 func (m *MultiMap) Get(key K) (front, end Iterator) {
 	lower, upper := m.tree.MultiGet(key)
 	return Iterator{lower}, Iterator{upper}
-}
-
-func (m *MultiMap) LowerBound(key K) *Iterator {
-	if itr := m.tree.LowerBound(key); itr != m.tree.End() {
-		return &Iterator{itr}
-	}
-	return nil
-}
-
-func (m *MultiMap) UpperBound(key K) *Iterator {
-	if itr := m.tree.UpperBound(key); itr != m.tree.End() {
-		return &Iterator{itr}
-	}
-	return nil
 }

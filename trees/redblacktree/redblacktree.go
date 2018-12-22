@@ -327,8 +327,7 @@ func (tree *Tree) MultiRemove(key interface{}) {
 
 	upper := tree.UpperBound(key)
 	for lower != upper {
-		tree.remove(lower.node)
-		lower.Next()
+		lower.Delete()
 	}
 }
 
