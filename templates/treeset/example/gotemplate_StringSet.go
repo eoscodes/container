@@ -17,7 +17,7 @@ import (
 	"strings"
 
 	"github.com/eosspark/container/templates"
-	rbt "github.com/eosspark/container/trees/redblacktree"
+	rbt "github.com/eosspark/container/templates/tree"
 	"github.com/eosspark/container/utils"
 )
 
@@ -29,8 +29,8 @@ func assertStringSetImplementation() {
 
 // Set holds elements in a red-black tree
 type StringSet struct {
-	isMulti bool
 	tree    *rbt.Tree
+	isMulti bool
 }
 
 var itemExistsStringSet = struct{}{}
@@ -230,6 +230,13 @@ func (iterator *IteratorStringSet) Last() bool {
 	return iterator.Prev()
 }
 
+// Delete remove the node which pointed by the iterator
+// The iterator will move to the next after delete
+// Modifies the state of the iterator.
+func (iterator *IteratorStringSet) Delete() {
+	iterator.iterator.Delete()
+}
+
 // Each calls the given function once for each element, passing that element's index and value.
 func (set *StringSet) Each(f func(value string)) {
 	iterator := set.Iterator()
@@ -298,6 +305,20 @@ func (set *StringSet) Find(f func(value string) bool) (v string) {
 	return
 }
 
+func (set *StringSet) LowerBound(item string) *IteratorStringSet {
+	if itr := set.tree.LowerBound(item); itr != set.tree.End() {
+		return &IteratorStringSet{itr}
+	}
+	return nil
+}
+
+func (set *StringSet) UpperBound(item string) *IteratorStringSet {
+	if itr := set.tree.UpperBound(item); itr != set.tree.End() {
+		return &IteratorStringSet{itr}
+	}
+	return nil
+}
+
 // ToJSON outputs the JSON representation of the set.
 func (set *StringSet) MarshalJSON() ([]byte, error) {
 	return json.Marshal(set.Values())
@@ -325,24 +346,10 @@ func NewMultiStringSet(items ...string) *MultiStringSet {
 }
 
 func CopyMultiFromStringSet(mts *MultiStringSet) *MultiStringSet {
-	return &MultiStringSet{StringSet{tree: rbt.CopyFrom(mts.tree)}}
+	return &MultiStringSet{StringSet{tree: rbt.CopyFrom(mts.tree), isMulti: true}}
 }
 
 func (set *MultiStringSet) Get(item string) (front, end IteratorStringSet) {
 	lower, upper := set.tree.MultiGet(item)
 	return IteratorStringSet{lower}, IteratorStringSet{upper}
-}
-
-func (set *MultiStringSet) LowerBound(item string) *IteratorStringSet {
-	if itr := set.tree.LowerBound(item); itr != set.tree.End() {
-		return &IteratorStringSet{itr}
-	}
-	return nil
-}
-
-func (set *MultiStringSet) UpperBound(item string) *IteratorStringSet {
-	if itr := set.tree.UpperBound(item); itr != set.tree.End() {
-		return &IteratorStringSet{itr}
-	}
-	return nil
 }

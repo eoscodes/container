@@ -116,10 +116,9 @@ func (set *MultiSet) Contains(items ...interface{}) bool {
 	return true
 }
 
-func (set *MultiSet) Get(key interface{}) (MultiSetIterator, MultiSetIterator) {
-	lower, upper := set.tree.MultiGet(key)
-	return MultiSetIterator{iterator: lower, tree: set.tree},
-	MultiSetIterator{iterator: upper, tree: set.tree}
+func (set *MultiSet) Get(key interface{}) (MultiSetIterator, bool) {
+	iterator, found := set.tree.MultiGet(key)
+	return MultiSetIterator{iterator: iterator, tree: set.tree}, found
 }
 
 // Empty returns true if set does not contain any elements.
@@ -151,4 +150,30 @@ func (set *MultiSet) String() string {
 	}
 	str += strings.Join(items, ", ")
 	return str
+}
+
+func (set *MultiSet) UpperBound(in interface{}) *MultiSetIterator{
+	if set.Size()>0{
+		mItr:=set.Iterator()
+		for mItr.Next(){
+			comp:=set.GetComparator()(in,mItr.Value())
+			if comp == -1{
+				return &mItr
+			}
+		}
+	}
+	return nil
+}
+
+func (set *MultiSet) LowerBound(in interface{}) *MultiSetIterator{
+	if set.Size()>0{
+		mItr:=set.Iterator()
+		for mItr.Next(){
+			comp:=set.GetComparator()(mItr.Value(),in)
+			if comp==0{
+				return &mItr
+			}
+		}
+	}
+	return nil
 }

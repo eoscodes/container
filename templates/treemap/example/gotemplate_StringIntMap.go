@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/eosspark/container/templates"
-	rbt "github.com/eosspark/container/trees/redblacktree"
+	rbt "github.com/eosspark/container/templates/tree"
 	"github.com/eosspark/container/utils"
 )
 
@@ -308,6 +308,27 @@ func (iterator *IteratorStringIntMap) Last() bool {
 	return iterator.iterator.Last()
 }
 
+// Delete remove the node which pointed by the iterator
+// The iterator will move to the next after delete
+// Modifies the state of the iterator.
+func (iterator *IteratorStringIntMap) Delete() {
+	iterator.iterator.Delete()
+}
+
+func (m *StringIntMap) LowerBound(key string) *IteratorStringIntMap {
+	if itr := m.tree.LowerBound(key); itr != m.tree.End() {
+		return &IteratorStringIntMap{itr}
+	}
+	return nil
+}
+
+func (m *StringIntMap) UpperBound(key string) *IteratorStringIntMap {
+	if itr := m.tree.UpperBound(key); itr != m.tree.End() {
+		return &IteratorStringIntMap{itr}
+	}
+	return nil
+}
+
 // ToJSON outputs the JSON representation of the map.
 type pairStringIntMap struct {
 	Key string
@@ -347,18 +368,4 @@ func NewMultiStringIntMap() *MultiStringIntMap {
 func (m *MultiStringIntMap) Get(key string) (front, end IteratorStringIntMap) {
 	lower, upper := m.tree.MultiGet(key)
 	return IteratorStringIntMap{lower}, IteratorStringIntMap{upper}
-}
-
-func (m *MultiStringIntMap) LowerBound(key string) *IteratorStringIntMap {
-	if itr := m.tree.LowerBound(key); itr != m.tree.End() {
-		return &IteratorStringIntMap{itr}
-	}
-	return nil
-}
-
-func (m *MultiStringIntMap) UpperBound(key string) *IteratorStringIntMap {
-	if itr := m.tree.UpperBound(key); itr != m.tree.End() {
-		return &IteratorStringIntMap{itr}
-	}
-	return nil
 }

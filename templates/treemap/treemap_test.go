@@ -64,17 +64,17 @@ func TestMapRemove(t *testing.T) {
 	m.Remove(8)
 	m.Remove(5)
 
-	if actualValue, expectedValue := fmt.Sprintf("%d", m.Keys()), "[]"; actualValue != expectedValue {
+	if actualValue, expectedValue := fmt.Sprintf("%d", m.Keys()), "[1 2 3 4]"; actualValue != expectedValue {
 		t.Errorf("Got %v expected %v", actualValue, expectedValue)
 	}
-	if actualValue, expectedValue := fmt.Sprintf("%s", m.Values()), "[]"; actualValue != expectedValue {
+	if actualValue, expectedValue := fmt.Sprintf("%s", m.Values()), "[a b c d]"; actualValue != expectedValue {
 		t.Errorf("Got %v expected %v", actualValue, expectedValue)
 	}
-	if actualValue := m.Size(); actualValue != 0 {
-		t.Errorf("Got %v expected %v", actualValue, 0)
+	if actualValue := m.Size(); actualValue != 4 {
+		t.Errorf("Got %v expected %v", actualValue, 4)
 	}
-	if actualValue := m.Empty(); actualValue != true {
-		t.Errorf("Got %v expected %v", actualValue, true)
+	if actualValue := m.Empty(); actualValue != false {
+		t.Errorf("Got %v expected %v", actualValue, false)
 	}
 
 	tests2 := [][]interface{}{

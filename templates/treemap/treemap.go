@@ -15,7 +15,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/eosspark/container/templates"
-	rbt "github.com/eosspark/container/trees/redblacktree"
+	rbt "github.com/eosspark/container/templates/tree"
 	"github.com/eosspark/container/utils"
 	"strings"
 )
