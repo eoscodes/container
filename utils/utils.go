@@ -11,6 +11,7 @@ package utils
 
 import (
 	"fmt"
+	"runtime/debug"
 	"strconv"
 	"testing"
 )
@@ -49,6 +50,7 @@ func ToString(value interface{}) string {
 
 func AssertTest(t *testing.T, expect interface{}, actual interface{}) {
 	if expectS, actualS := fmt.Sprint(expect), fmt.Sprint(actual); expectS != actualS {
+		debug.PrintStack()
 		t.Fatalf("expect %s, but got %s", expectS, actualS)
 	}
 }

@@ -29,7 +29,9 @@ func (tree *Tree) Iterator() Iterator {
 }
 
 func (tree *Tree) Begin() Iterator {
-	return Iterator{tree: tree, node: nil, position: begin}
+	itr := Iterator{tree: tree, node: nil, position: begin}
+	itr.Next()
+	return itr
 }
 
 func (tree *Tree) End() Iterator {
@@ -129,6 +131,14 @@ between:
 	return true
 }
 
+func (iterator *Iterator) HasNext() bool {
+	return iterator.position != end
+}
+
+func (iterator *Iterator) HasPrev() bool {
+	return iterator.position != begin
+}
+
 // Value returns the current element's value.
 // Does not modify the state of the iterator.
 func (iterator *Iterator) Value() interface{} {
@@ -148,11 +158,19 @@ func (iterator *Iterator) Begin() {
 	iterator.position = begin
 }
 
+func (iterator *Iterator) IsBegin() bool {
+	return iterator.position == begin
+}
+
 // End moves the iterator past the last element (one-past-the-end).
 // Call Prev() to fetch the last element if any.
 func (iterator *Iterator) End() {
 	iterator.node = nil
 	iterator.position = end
+}
+
+func (iterator *Iterator) IsEnd() bool {
+	return iterator.position == end
 }
 
 // First moves the iterator to the first element and returns true if there was a first element in the container.
@@ -176,6 +194,6 @@ func (iterator *Iterator) Last() bool {
 // Modifies the state of the iterator.
 func (iterator *Iterator) Delete() {
 	node := iterator.node
-	iterator.Next()
+	iterator.Prev()
 	iterator.tree.remove(node)
 }

@@ -40,8 +40,8 @@ func TestMapPut(t *testing.T) {
 
 	for _, test := range tests1 {
 		// retrievals
-		actualValue, actualFound := m.Get(test[0].(int))
-		if actualValue != test[1] || actualFound != test[2] {
+		actualValue := m.Get(test[0].(int))
+		if (actualValue.HasNext() && actualValue.Value() != test[1]) || actualValue.HasNext() != test[2] {
 			t.Errorf("Got %v expected %v", actualValue, test[1])
 		}
 	}
@@ -89,8 +89,8 @@ func TestMapRemove(t *testing.T) {
 	}
 
 	for _, test := range tests2 {
-		actualValue, actualFound := m.Get(test[0].(int))
-		if actualValue != test[1] || actualFound != test[2] {
+		actualValue := m.Get(test[0].(int))
+		if (actualValue.HasNext() && actualValue.Value() != test[1]) || actualValue.HasNext() != test[2] {
 			t.Errorf("Got %v expected %v", actualValue, test[1])
 		}
 	}
@@ -231,6 +231,17 @@ func TestMapEach(t *testing.T) {
 			t.Errorf("Too many")
 		}
 	})
+
+	expects := []string{"a","b","c"}
+
+	m1 := NewIntStringPtrMap()
+	m1.Put(0,&expects[0])
+	m1.Put(1,&expects[1])
+	m1.Put(2,&expects[2])
+	m1.Put(3,nil)
+
+	m1.Each(func(key int, value *string) {
+	})
 }
 
 func TestMapSerialization(t *testing.T) {
@@ -254,6 +265,32 @@ func TestMapSerialization(t *testing.T) {
 
 	utils.AssertTest(t, []int{1, 2, 3, 4, 5}, deserialized.Keys())
 	utils.AssertTest(t, []string{"1", "2", "3", "4", "5"}, deserialized.Values())
+}
+
+func TestMapSerialization2(t *testing.T) {
+	original := NewIntStringPtrMap()
+	expects := []string{"0","1","2","3","4","5"}
+
+	original.Put(4, &expects[4])
+	original.Put(5, &expects[5])
+	original.Put(3, &expects[3])
+	original.Put(2, &expects[2])
+	original.Put(1, &expects[1])
+	original.Put(6, nil)
+
+	serialized, err := original.MarshalJSON()
+	if err != nil {
+		t.Errorf("Got error %v", err)
+	}
+
+	deserialized := NewIntStringMap()
+	err = deserialized.UnmarshalJSON(serialized)
+	if err != nil {
+		t.Errorf("Got error %v", err)
+	}
+
+	utils.AssertTest(t, []int{1, 2, 3, 4, 5, 6}, deserialized.Keys())
+	utils.AssertTest(t, []string{"1", "2", "3", "4", "5", ""}, deserialized.Values())
 }
 
 /**

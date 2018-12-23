@@ -29,6 +29,7 @@ const (
 
 // Tree holds elements of the red-black tree
 type Tree struct {
+	isMulti    bool
 	Root       *Node
 	size       int
 	Comparator utils.Comparator
@@ -45,22 +46,22 @@ type Node struct {
 }
 
 // NewWith instantiates a red-black tree with the custom comparator.
-func NewWith(comparator utils.Comparator) *Tree {
-	return &Tree{Comparator: comparator}
+func NewWith(comparator utils.Comparator, isMulti bool) *Tree {
+	return &Tree{Comparator: comparator, isMulti: isMulti}
 }
 
 // NewWithIntComparator instantiates a red-black tree with the IntComparator, i.e. keys are of type int.
-func NewWithIntComparator() *Tree {
-	return &Tree{Comparator: utils.IntComparator}
+func NewWithIntComparator(isMulti bool) *Tree {
+	return &Tree{Comparator: utils.IntComparator, isMulti: isMulti}
 }
 
 // NewWithStringComparator instantiates a red-black tree with the StringComparator, i.e. keys are of type string.
-func NewWithStringComparator() *Tree {
-	return &Tree{Comparator: utils.StringComparator}
+func NewWithStringComparator(isMulti bool) *Tree {
+	return &Tree{Comparator: utils.StringComparator, isMulti: isMulti}
 }
 
 func CopyFrom(rbt *Tree) *Tree {
-	t := &Tree{Comparator: rbt.Comparator}
+	t := &Tree{Comparator: rbt.Comparator, isMulti: rbt.isMulti}
 	t.size = rbt.size
 	t.Root = copyNode(rbt.Root)
 	return t
@@ -115,28 +116,52 @@ func (tree *Tree) Put(key interface{}, value interface{}) {
 	} else {
 		node := tree.Root
 		loop := true
-		for loop {
-			compare := tree.Comparator(key, node.Key)
-			switch {
-			case compare == 0:
-				node.Key = key
-				node.Value = value
-				return
-			case compare < 0:
-				if node.Left == nil {
-					node.Left = &Node{Key: key, Value: value, color: red}
-					insertedNode = node.Left
-					loop = false
-				} else {
-					node = node.Left
+		if tree.isMulti {
+			for loop {
+				compare := tree.Comparator(key, node.Key)
+				switch {
+				case compare < 0:
+					if node.Left == nil {
+						node.Left = &Node{Key: key, Value: value, color: red}
+						insertedNode = node.Left
+						loop = false
+					} else {
+						node = node.Left
+					}
+				case compare >= 0:
+					if node.Right == nil {
+						node.Right = &Node{Key: key, Value: value, color: red}
+						insertedNode = node.Right
+						loop = false
+					} else {
+						node = node.Right
+					}
 				}
-			case compare > 0:
-				if node.Right == nil {
-					node.Right = &Node{Key: key, Value: value, color: red}
-					insertedNode = node.Right
-					loop = false
-				} else {
-					node = node.Right
+			}
+		} else {
+			for loop {
+				compare := tree.Comparator(key, node.Key)
+				switch {
+				case compare == 0:
+					node.Key = key
+					node.Value = value
+					return
+				case compare < 0:
+					if node.Left == nil {
+						node.Left = &Node{Key: key, Value: value, color: red}
+						insertedNode = node.Left
+						loop = false
+					} else {
+						node = node.Left
+					}
+				case compare > 0:
+					if node.Right == nil {
+						node.Right = &Node{Key: key, Value: value, color: red}
+						insertedNode = node.Right
+						loop = false
+					} else {
+						node = node.Right
+					}
 				}
 			}
 		}
@@ -200,56 +225,11 @@ func (tree *Tree) PutItem(key interface{}, value interface{}) (bool, interface{}
 	return resultOpt, resultKey, resultValue
 }
 
-func (tree *Tree) MultiPut(key interface{}, value interface{}) {
-	var insertedNode *Node
-	if tree.Root == nil {
-		// Assert key is of comparator's type for initial tree
-		tree.Comparator(key, key)
-		tree.Root = &Node{Key: key, Value: value, color: red}
-		insertedNode = tree.Root
-	} else {
-		node := tree.Root
-		loop := true
-		for loop {
-			compare := tree.Comparator(key, node.Key)
-			switch {
-			case compare < 0:
-				if node.Left == nil {
-					node.Left = &Node{Key: key, Value: value, color: red}
-					insertedNode = node.Left
-					loop = false
-				} else {
-					node = node.Left
-				}
-			case compare >= 0:
-				if node.Right == nil {
-					node.Right = &Node{Key: key, Value: value, color: red}
-					insertedNode = node.Right
-					loop = false
-				} else {
-					node = node.Right
-				}
-			}
-		}
-		insertedNode.Parent = node
-	}
-	tree.insertCase1(insertedNode)
-	tree.size++
-}
-
 // Get searches the node in the tree by key and returns its value or nil if key is not found in tree.
 // Second return parameter is true if key was found, otherwise false.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
-func (tree *Tree) Get(key interface{}) (value interface{}, found bool) {
-	node := tree.lookup(key)
-	if node != nil {
-		return node.Value, true
-	}
-	return nil, false
-}
-
-func (tree *Tree) MultiGet(key interface{}) (front, end Iterator) {
-	return tree.LowerBound(key), tree.UpperBound(key)
+func (tree *Tree) Get(key interface{}) Iterator {
+	return tree.LowerBound(key)
 }
 
 // LowerBound returns an iterator pointing to the first element that is not less than the given key.
@@ -313,21 +293,19 @@ func (tree *Tree) UpperBound(key interface{}) Iterator {
 // Remove remove the node from the tree by key.
 // Key should adhere to the comparator's type assertion, otherwise method panics.
 func (tree *Tree) Remove(key interface{}) {
-	node := tree.lookup(key)
-	tree.remove(node)
-}
-
-// MultiRemove remove all nodes from the tree by key.
-func (tree *Tree) MultiRemove(key interface{}) {
-	lower := tree.LowerBound(key)
-	if lower.position == end {
-		//found missed, nothing needs to remove
-		return
-	}
-
-	upper := tree.UpperBound(key)
-	for lower != upper {
-		lower.Delete()
+	if tree.isMulti {
+		for lower := tree.LowerBound(key); lower.position != end; {
+			if tree.Comparator(lower.Key(), key) == 0 {
+				node := lower.node
+				lower.Next()
+				tree.remove(node)
+			} else {
+				break
+			}
+		}
+	} else {
+		node := tree.lookup(key)
+		tree.remove(node)
 	}
 }
 

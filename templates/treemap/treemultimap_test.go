@@ -5,13 +5,14 @@
 package treemap
 
 import (
-	"github.com/eosspark/container/templates/treemap/example"
+	"fmt"
+	. "github.com/eosspark/container/templates/treemap/example"
 	"github.com/eosspark/container/utils"
 	"testing"
 )
 
 func TestMultiMapPut(t *testing.T) {
-	m := example.NewMultiIntStringMap()
+	m := NewMultiIntStringMap()
 	m.Put(5, "e")
 	m.Put(6, "f")
 	m.Put(7, "g")
@@ -41,18 +42,19 @@ func TestMultiMapPut(t *testing.T) {
 
 	for _, test := range tests1 {
 		// retrievals
-		lower, _ := m.Get(test[0].(int))
+		lower := m.Get(test[0].(int))
 		if expect := test[1]; expect != nil {
 			utils.AssertTest(t, test[1].(string), lower.Value())
 		} else {
-			//utils.AssertTest(t, true, lower == m.End())
+			utils.AssertTest(t, true, lower == m.End())
+			utils.AssertTest(t, true, lower.IsEnd())
+			utils.AssertTest(t, false, lower.HasNext())
 		}
 	}
 }
 
-/*
 func TestMultiMapRemove(t *testing.T) {
-	m := NewMultiWithIntComparator(utils.TypeString)
+	m := NewMultiIntStringMap()
 	m.Put(5, "e")
 	m.Put(6, "f")
 	m.Put(7, "g")
@@ -68,13 +70,9 @@ func TestMultiMapRemove(t *testing.T) {
 	m.Remove(8)
 	m.Remove(5)
 
-	if actualValue, expectedValue := m.Keys(), []interface{}{1, 1, 2, 3, 4}; !sameElements(actualValue, expectedValue) {
-		t.Errorf("Got %v expected %v", actualValue, expectedValue)
-	}
+	utils.AssertTest(t, []int{1, 1, 2, 3, 4}, m.Keys())
+	utils.AssertTest(t, []interface{}{"x", "a", "b", "c", "d"}, m.Values())
 
-	if actualValue, expectedValue := m.Values(), []interface{}{"x", "a", "b", "c", "d"}; !sameElements(actualValue, expectedValue) {
-		t.Errorf("Got %v expected %v", actualValue, expectedValue)
-	}
 	if actualValue := m.Size(); actualValue != 5 {
 		t.Errorf("Got %v expected %v", actualValue, 5)
 	}
@@ -91,8 +89,8 @@ func TestMultiMapRemove(t *testing.T) {
 	}
 
 	for _, test := range tests2 {
-		actualValue, actualFound := m.Get(test[0])
-		if actualValue != test[1] || actualFound != test[2] {
+		actualValue := m.Get(test[0].(int))
+		if (actualValue.HasNext() && actualValue.Value() != test[1]) || actualValue.HasNext() != test[2] {
 			t.Errorf("Got %v expected %v", actualValue, test[1])
 		}
 	}
@@ -104,7 +102,7 @@ func TestMultiMapRemove(t *testing.T) {
 	m.Remove(2)
 	m.Remove(2)
 
-	if actualValue, expectedValue := fmt.Sprintf("%s", m.Keys()), "[]"; actualValue != expectedValue {
+	if actualValue, expectedValue := fmt.Sprintf("%d", m.Keys()), "[]"; actualValue != expectedValue {
 		t.Errorf("Got %v expected %v", actualValue, expectedValue)
 	}
 	if actualValue, expectedValue := fmt.Sprintf("%s", m.Values()), "[]"; actualValue != expectedValue {
@@ -118,6 +116,7 @@ func TestMultiMapRemove(t *testing.T) {
 	}
 }
 
+/*
 func TestMultiMapFloor(t *testing.T) {
 	m := NewMultiWithIntComparator(utils.TypeString)
 	m.Put(7, "g")
