@@ -152,14 +152,18 @@ func (m *Map) End() Iterator {
 
 // Value returns the current element's value.
 // Does not modify the state of the Iterator.
-func (Iterator *Iterator) Value() V {
-	return Iterator.Iterator.Value().(V)
+func (iterator *Iterator) Value() V {
+	return iterator.Iterator.Value().(V)
 }
 
 // Key returns the current element's key.
 // Does not modify the state of the Iterator.
-func (Iterator *Iterator) Key() K {
-	return Iterator.Iterator.Key().(K)
+func (iterator *Iterator) Key() K {
+	return iterator.Iterator.Key().(K)
+}
+
+func (iterator *Iterator) Modify(key K, value V) Iterator {
+	return Iterator{iterator.Iterator.Modify(key, value)}
 }
 
 func (m *Map) LowerBound(key K) Iterator {
